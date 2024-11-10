@@ -1,0 +1,255 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct NGUOIDONGTHUE {
+    string maNguoiDT;
+    string maThue;
+    string tenCongTy;
+    string diaChi;
+    string quyMo;
+    string nguoiDungDau;
+    int dienTich;
+};
+
+// Cau truc danh sách lien ket don
+struct Node {
+    NGUOIDONGTHUE thongTin;
+    Node* next;
+};
+
+// Cau trúc danh sách
+struct DanhSach {
+    Node* dau;
+    Node* cuoi;
+};
+
+// Khoi tao danh sach lien ket don
+void KhoiTao(DanhSach& ds) {
+    ds.dau = NULL;   
+    ds.cuoi = NULL;   
+}
+
+// Ham tao 1 node moi
+Node* getNode(NGUOIDONGTHUE x) {
+    Node* pNDT = new Node;
+    if (pNDT == NULL) {   
+        cout << "Cap phat loi!" << endl;
+        return NULL;   
+    }
+    pNDT->thongTin = x;
+    pNDT->next = NULL;   
+    return pNDT;
+}
+
+// Ham chcn vao cuoi danh sách
+void chenLast(DanhSach& ds, Node* pNDT) {
+    if (ds.dau == NULL) {   
+        ds.dau = ds.cuoi = pNDT;
+    } else {
+        ds.cuoi->next = pNDT;
+        ds.cuoi = pNDT;
+    }
+}
+
+// Ham nhap thông tin nguoi dung thue
+void nhapNDT(NGUOIDONGTHUE& x) {
+    cout << "Nhap ma nguoi dong thue: "; cin >> x.maNguoiDT;
+    cout << "Nhap ma thue: "; cin >> x.maThue;
+    cin.ignore();  
+    cout << "Nhap ten cong ty: "; getline(cin, x.tenCongTy);
+    cout << "Nhap dia chi: "; getline(cin, x.diaChi);
+    cout << "Nhap quy mo: "; getline(cin, x.quyMo);
+    cout << "Nhap nguoi dung dau: "; getline(cin, x.nguoiDungDau);
+    cout << "Nhap dien tich: "; cin >> x.dienTich;
+}
+
+// Ham xuat thong tin nguoi dong thue
+void xuatNDT(NGUOIDONGTHUE x) {
+    cout << setw(18) << left << x.maNguoiDT << "\t"
+         << setw(8) << left << x.maThue << "\t"
+         << setw(12) << left << x.tenCongTy << "\t"
+         << setw(7) << left << x.quyMo << "\t"
+         << setw(10) << left << x.diaChi << "\t"
+         << setw(18) << left << x.nguoiDungDau << "\t"
+         << setw(8) << x.dienTich << endl;
+}
+
+// Ham xuat danh sach nguoi dong thue
+void xuatDSNDT(DanhSach ds) {
+    cout << "Danh sach hien co:" << endl;
+    cout << setw(18) << left << "Ma Nguoi Dong Thue" << "\t"
+         << setw(8) << left << "Ma Thue" << "\t"
+         << setw(12) << left << "Ten Cong Ty" << "\t"
+         << setw(7) << left << "Quy Mo" << "\t"
+         << setw(10) << left << "Dia Chi" << "\t"
+         << setw(18) << left << "Nguoi Dung Dau" << "\t"
+         << setw(8) << "Dien Tich" << endl;
+
+    for (Node* p = ds.dau; p != NULL; p = p->next) {   
+        xuatNDT(p->thongTin);
+    }
+}
+
+// Ham tem kiem nguoi dong thue theo ma
+Node* timKiem(DanhSach& ds, string maNguoiDT) {
+    Node* pNDT = ds.dau;
+    while (pNDT != NULL) {   
+        if (pNDT->thongTin.maNguoiDT == maNguoiDT) {
+            return pNDT;
+        }
+        pNDT = pNDT->next;
+    }
+    return NULL;   
+}
+
+// Ham sap xep theo den tích
+void sapXepTheoDienTich(DanhSach& ds) {
+    for (Node* pNDT = ds.dau; pNDT != NULL; pNDT = pNDT->next) {   
+        for (Node* q = pNDT->next; q != NULL; q = q->next) {   
+            if (pNDT->thongTin.dienTich > q->thongTin.dienTich) {
+                NGUOIDONGTHUE temp = pNDT->thongTin;
+                pNDT->thongTin = q->thongTin;
+                q->thongTin = temp;
+            }
+        }
+    }
+}
+
+// Ham xaa nguoi dong thue theo mã
+bool Remove(DanhSach& ds, string maNguoiDT) {
+    Node* pNDT = ds.dau;
+    Node* q = NULL;   
+
+    while (pNDT != NULL) {   
+        if (pNDT->thongTin.maNguoiDT == maNguoiDT) {
+            break;
+        }
+        q = pNDT;
+        pNDT = pNDT->next;
+    }
+
+    if (pNDT == NULL) return false;   
+
+    if (q != NULL) {
+        if (q == ds.cuoi) {
+            ds.cuoi = q;
+        }
+        q->next = pNDT->next;
+    } else {
+        ds.dau = pNDT->next;
+    }
+    return true;
+}
+
+// Ham tim cong ty theo dia chi
+void TimDiaChi(DanhSach& ds, string diaChi) {
+    cout << "Danh sach cong ty co dia chi " << diaChi << " la:" << endl;
+    for (Node* pNDT = ds.dau; pNDT != NULL; pNDT = pNDT->next) {   
+        if (pNDT->thongTin.diaChi == diaChi) {
+            xuatNDT(pNDT->thongTin);
+        }
+    }
+}
+
+// Ham luu danh sách vao file
+void Luufile(FILE* f, DanhSach& ds, const char* filename) {
+    f = fopen(filename, "wb");
+    if (f == NULL) {   
+        cout << "Khong the mo file!" << endl;
+        return;
+    }
+
+    int n = 0;
+    for (Node* pNDT = ds.dau; pNDT != NULL; pNDT = pNDT->next) {   
+        n++;
+    }
+
+    fwrite(&n, sizeof(int), 1, f);
+
+    for (Node* pNDT = ds.dau; pNDT != NULL; pNDT = pNDT->next) {   
+        fwrite(&pNDT->thongTin, sizeof(NGUOIDONGTHUE), 1, f);
+    }
+
+    fclose(f);
+    cout << "Ghi file thanh cong!" << endl;
+}
+
+// Ham doc danh sach tu file
+void DocFile(FILE* f, DanhSach& ds, const char* filename) {
+    f = fopen(filename, "rb");
+    if (f == NULL) {   
+        cout << "Khong the mo file!" << endl;
+        return;
+    }
+
+    int n;
+    fread(&n, sizeof(int), 1, f);
+
+    NGUOIDONGTHUE x;
+    for (int i = 0; i < n; i++) {
+        fread(&x, sizeof(NGUOIDONGTHUE), 1, f);
+        Node* pNDT = getNode(x);
+        chenLast(ds, pNDT);
+    }
+
+    fclose(f);
+    cout << "Doc file thanh cong!" << endl;
+    xuatDSNDT(ds);
+}
+
+int main() {
+    DanhSach ds;
+    KhoiTao(ds);
+    int n;
+    cout << "Nhap so luong nguoi dong thue: ";
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        NGUOIDONGTHUE nguoi;
+        nhapNDT(nguoi);
+        Node* p = getNode(nguoi);
+        chenLast(ds, p);
+    }
+
+    cout << "\nDanh sach nguoi dong thue:\n";
+    xuatDSNDT(ds);
+
+    sapXepTheoDienTich(ds);
+    cout << "\nDanh sach sau khi sap xep theo dien tich:\n";
+    xuatDSNDT(ds);
+    string maTimKiem;
+    cout << "\nNhap ma nguoi dong thue can tim: ";
+    cin >> maTimKiem;
+    Node* pNDT = timKiem(ds, maTimKiem);
+    if (pNDT != NULL) {   
+        cout << "Da tim thay nguoi dong thue: ";
+        xuatNDT(pNDT->thongTin);
+    } else {
+        cout << "Khong tim thay nguoi dong thue voi ma: " << maTimKiem << endl;
+    }
+    string maXoa;
+    cout << "\nNhap ma nguoi dong thue can xoa: ";
+    cin >> maXoa;
+    bool xoaThanhCong = Remove(ds, maXoa);
+    if (xoaThanhCong) {
+        cout << "Xoa nguoi dong thue thanh cong!\n";
+    } else {
+        cout << "Khong tim thay nguoi dong thue de xoa!\n";
+    }
+    cout << "\nDanh sach sau khi xoa:\n";
+    xuatDSNDT(ds);
+    string diaChiTim;
+    cout << "\nNhap dia chi can tim: ";
+    cin.ignore();
+    getline(cin, diaChiTim);
+    TimDiaChi(ds, diaChiTim);
+    FILE* f = NULL; 
+    char filename[] = "nguoi_dong_thue.txt";
+    Luufile(f, ds, filename);
+    DanhSach dsDoc;
+    KhoiTao(dsDoc);
+    DocFile(f, dsDoc, filename);
+
+    return 0;
+}
+
